@@ -2,6 +2,7 @@
 #include <kernel/fb.h>
 #include <kernel/io.h>
 #include <kernel/interrupts.h>
+#include <stdio.h>
 
 void init()
 {
@@ -15,7 +16,7 @@ void kmain(void)
     init();
 
     kclear_screen();
-    kputs("Hello kernel!\nHello world!\n\n");
+    printf("Hello kernel!\nHello world!\n\n");
 
     return;
 }

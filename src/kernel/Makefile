@@ -1,5 +1,5 @@
-INC_DIR := "../../include"
-CC := gcc -m32 -fno-stack-protector -I $(INC_DIR)
+INCLUDES := -I "../../include" -I "../../libc"
+CC := gcc -m32 -fno-stack-protector $(INCLUDES) -nostdlib -nodefaultlibs -nolibc -ffreestanding -Wall -Wextra
 AS := nasm -f elf32
 
 obj = kernel.o io.o interrupts.o sys.o fb.o

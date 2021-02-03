@@ -1,6 +1,6 @@
 CC := gcc -m32 -fno-stack-protector -I ../../include
 
-obj = string.o
+obj = string.o stdlib.o stdio.o
 
 %.o: %.c
 	$(CC) -c -o $@ $<
