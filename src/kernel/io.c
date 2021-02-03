@@ -15,8 +15,6 @@ void keyboard_handler_main()
     /* Lowest bit of status will be set if buffer is not empty */
     if (status & 0x01) {
         keycode = read_port(KEYBOARD_DATA_PORT);
-        if(keycode < 0)
-            return;
 
         // Change this to fill a buffer
         uint8_t ascii = keycode_to_ascii(keycode);
