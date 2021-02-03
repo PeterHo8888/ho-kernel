@@ -4,23 +4,23 @@
 #include <string.h>
 
 
-struct __attribute__((__packed__)) IDTDesc {
+struct IDTDesc {
     uint16_t offset_1; // offset bits 0..15
     uint16_t selector; // a code segment selector in GDT or LDT
     uint8_t zero;      // unused, set to 0
     uint8_t type_attr; // type and attributes, see below
     uint16_t offset_2; // offset bits 16..31
-};
+} __attribute__((__packed__));
 
 /*
 idt_info:
     dw idt_end - idt_start - 1
     dd idt_start
 */
-struct __attribute__((__packed__)) IDTInfo {
+struct IDTInfo {
     uint16_t size;
     uint32_t addr;
-};
+} __attribute__((__packed__));
 
 #define IDT_SIZE 256
 struct IDTDesc IDT[IDT_SIZE];

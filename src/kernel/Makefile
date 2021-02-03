@@ -1,15 +1,24 @@
-INCLUDES := -I "../../include" -I "../../libc"
-CC := gcc -m32 -fno-stack-protector $(INCLUDES) -nostdlib -nodefaultlibs -nolibc -ffreestanding -Wall -Wextra
-AS := nasm -f elf32
+INCLUDES = -I "../../include" -I "../../include/lib"
 
-obj = kernel.o io.o interrupts.o sys.o fb.o
+CC = i686-elf-gcc
+CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-stack-protector $(INCLUDES)
+
+CXX = i686-elf-g++
+CXXFLAGS = -ffreestanding -O2 -Wall -Wextra -fno-use-cxa-atexit -fno-exceptions -fno-rtti $(INCLUDES)
+
+AS = nasm -f elf32
+
+obj = kernel.o io.o interrupts.o sys.o fb.o gdt.o
 
 .PHONY: all clean
 
 all: $(obj)
 
 %.o: %.c $(INC_DIR)/kernel/%.h
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cc $(INC_DIR)/kernel/%.h
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 sys.o: sys.s
 	$(AS) -o sys.o $<
