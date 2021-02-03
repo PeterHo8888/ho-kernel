@@ -1,6 +1,8 @@
 #include <kernel/kernel.h>
 #include <kernel/fb.h>
 #include <kernel/types.h>
+//#include <lib/string.h>
+#include <string.h>
 
 #define FB_WIDTH 80
 #define FB_HEIGHT 25
@@ -40,12 +42,36 @@ void fb_init()
     vga_index = 0;
 }
 
+
 static void update_cursor()
 {
     write_port(0x3d4, 0x0f);
     write_port(0x3d5, (uint8_t)(vga_index & 0xff));
     write_port(0x3d4, 0x0e);
     write_port(0x3d5, (uint8_t)((vga_index >> 8) & 0xff));
+}
+
+/*
+ * This function wipes out the last line
+ * Only call it when the cursor is at FB_WIDTH * FB_HEIGHT,
+ * otherwise you *will* lose data
+ */
+static void scroll_screen()
+{
+    vga_index -= FB_WIDTH;
+
+    uint16_t *buffer = (uint16_t *)VGA_ADDRESS;
+
+    // Shift frame buffer up
+    memmove(buffer,
+            &buffer[FB_WIDTH],
+            (FB_WIDTH * FB_HEIGHT - FB_WIDTH) * sizeof(*buffer)
+           );
+
+    // Clear last line
+    uint16_t blank = vga_fmt(' ', FG_COLOR, BG_COLOR);
+    for (size_t i = 0; i < FB_WIDTH; ++i)
+        buffer[FB_WIDTH * FB_HEIGHT - FB_WIDTH + i] = blank;
 }
 
 void kclear_screen()
@@ -72,6 +98,10 @@ void kputc(char c)
         terminal_buffer[vga_index++] = vga_fmt(c, FG_COLOR, BG_COLOR);
         break;
     }
+
+    // Need to see if it's okay to overrun the frame buffer by a char
+    if (vga_index == FB_WIDTH * FB_HEIGHT)
+        scroll_screen();
     update_cursor();
 }
 
