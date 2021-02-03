@@ -11,7 +11,7 @@ static void *internal_memcpy(void *dest, const void *src, size_t n, int dir)
         for (size_t i = 0; i < n; ++i)
             ((char *)dest)[i] = ((char *)src)[i];
     } else {
-        for (size_t i = n - 1; i >= 0; --i)
+        for (int i = n - 1; i >= 0; --i)
             ((char *)dest)[i] = ((char *)src)[i];
     }
     return dest;
@@ -99,6 +99,7 @@ void *memset(void *s, int c, size_t n)
 {
     for (size_t i = 0; i < n; ++i)
         ((char *)s)[i] = c;
+    return s;
 }
 
 size_t strlen(const char *s)

@@ -11,6 +11,7 @@ static int print(const char *data, size_t len)
     for (size_t i = 0; i < len; ++i)
         if (putchar(data[i]) == EOF)
             return false;
+    return true;
 }
 
 int printf(const char *format, ...)
@@ -38,7 +39,7 @@ int printf(const char *format, ...)
         }
 
         // We have a %
-        switch (*format) {
+        switch (*++format) {
         case 'c':
             ++format;
             const char c = (char) va_arg(list, int);
