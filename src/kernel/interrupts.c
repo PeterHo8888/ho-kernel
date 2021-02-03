@@ -1,33 +1,45 @@
 #include <kernel/kernel.h>
 #include <kernel/interrupts.h>
 #include <kernel/types.h>
+#include <string.h>
 
-extern void load_idt(uint32_t *idt_ptr);
-extern void keyboard_handler();
 
-struct IDT_entry {
-    uint16_t offset_lowerbits;
-    uint16_t selector;
-    uint8_t zero;
-    uint8_t type_attr;
-    uint16_t offset_higherbits;
+struct __attribute__((__packed__)) IDTDesc {
+    uint16_t offset_1; // offset bits 0..15
+    uint16_t selector; // a code segment selector in GDT or LDT
+    uint8_t zero;      // unused, set to 0
+    uint8_t type_attr; // type and attributes, see below
+    uint16_t offset_2; // offset bits 16..31
+};
+
+/*
+idt_info:
+    dw idt_end - idt_start - 1
+    dd idt_start
+*/
+struct __attribute__((__packed__)) IDTInfo {
+    uint16_t size;
+    uint32_t addr;
 };
 
 #define IDT_SIZE 256
-struct IDT_entry IDT[IDT_SIZE];
+struct IDTDesc IDT[IDT_SIZE];
+
+extern void load_idt(struct IDTInfo *desc);
+extern void keyboard_handler();
 
 void idt_init()
 {
     uint32_t keyboard_address;
-    uint32_t idt_address;
-    uint32_t idt_ptr[2];
+
+    memset(IDT, '\0', sizeof(IDT));
 
     keyboard_address = (uint32_t)keyboard_handler;
-    IDT[0x21].offset_lowerbits = keyboard_address & 0xffff;
+    IDT[0x21].offset_1 = keyboard_address & 0xffff;
     IDT[0x21].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
     IDT[0x21].zero = 0;
     IDT[0x21].type_attr = 0x8e; /* INTERRUPT_GATE */
-    IDT[0x21].offset_higherbits = (keyboard_address & 0xffff0000) >> 16;
+    IDT[0x21].offset_2 = keyboard_address >> 16;
 
     /*
      * Ports
@@ -62,10 +74,15 @@ void idt_init()
     write_port(0xA1 , 0xff);
 
     /* fill the IDT descriptor */
-    idt_address = (uint32_t)IDT ;
-    idt_ptr[0] = (sizeof(struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
-    idt_ptr[1] = idt_address >> 16 ;
+    //idt_address = (uint32_t)IDT ;
+    //idt_ptr[0] = (sizeof(struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
+    //idt_ptr[1] = idt_address >> 16 ;
 
-    load_idt(idt_ptr);
+    struct IDTInfo idt_desc = {
+        sizeof(IDT),
+        (uint32_t)IDT
+    };
+
+    load_idt(&idt_desc);
 }
 

@@ -11,9 +11,6 @@ void keyboard_handler_main()
     uint8_t status;
     uint8_t keycode;
 
-    /* write EOI */
-    write_port(0x20, 0x20);
-
     status = read_port(KEYBOARD_STATUS_PORT);
     /* Lowest bit of status will be set if buffer is not empty */
     if (status & 0x01) {
@@ -26,6 +23,9 @@ void keyboard_handler_main()
         if (ascii)
             kputc(ascii);
     }
+
+    /* write EOI */
+    write_port(0x20, 0x20);
 }
 
 void kb_init()
