@@ -1,6 +1,10 @@
 #pragma once
 #include <kernel/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define KEY_NONE        0x00
 #define KEY_ESC         0x01
 #define KEY_1           0x02
@@ -119,3 +123,7 @@ inline __attribute__((always_inline)) uint8_t keycode_to_ascii(const uint8_t key
         return 0;
     return map[keycode];
 }
+
+#ifdef __cplusplus
+}
+#endif
