@@ -20,17 +20,19 @@ void __cxa_pure_virtual()
 
 void init()
 {
+    gdt_init();
     idt_init();
     kb_init();
-    fb_init();
 }
 
 void kmain(void)
 {
-    init();
+    fb_init();
 
     kclear_screen();
     printf("Hello kernel!\nHello world!\n\n");
+
+    init();
 
     return;
 }
