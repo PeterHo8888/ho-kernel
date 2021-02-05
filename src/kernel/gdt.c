@@ -40,6 +40,9 @@ struct gdt_ptr {
  */
 extern void write_gdt(struct gdt_ptr *ptr);
 
+static struct gdt_entry GDT[5];
+static struct gdt_ptr ptr = {.limit = sizeof(GDT) - 1, .base = (uint32_t)&GDT};
+
 static void encode_gdt_entry(struct gdt_entry *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity)
 {
     entry->base_lo = base & 0xffff;
@@ -62,16 +65,11 @@ static void encode_gdt_entry(struct gdt_entry *entry, uint32_t base, uint32_t li
 #define GRANULARITY 0xCF        // (1kbyte, 32bit)
 void gdt_init()
 {
-    struct gdt_entry GDT[4];
-    struct gdt_ptr ptr = {.limit = sizeof(GDT) - 1, .base = (uint32_t)&GDT};
-
-    printf("Initializing Global Descriptor Table...");
     encode_gdt_entry(&GDT[0], 0, 0, 0, 0);
     encode_gdt_entry(&GDT[1], 0, SEGMENT_SIZE, KERNEL_CODE_ACCESS, GRANULARITY);
     encode_gdt_entry(&GDT[2], 0, SEGMENT_SIZE, KERNEL_DATA_ACCESS, GRANULARITY);
     encode_gdt_entry(&GDT[3], 0, SEGMENT_SIZE, USER_CODE_ACCESS, GRANULARITY);
-    //encode_gdt_entry(&GDT[4], 0, SEGMENT_SIZE, USER_DATA_ACCESS, GRANULARITY);
+    encode_gdt_entry(&GDT[4], 0, SEGMENT_SIZE, USER_DATA_ACCESS, GRANULARITY);
 
     write_gdt(&ptr);
-    printf("Done.\n");
 }
