@@ -62,4 +62,13 @@ void isr_handler(struct cpu_ctx regs)
         kprintf("Received interrupt %s\n", cpu_reserved_interrupt_str[regs.int_no]);
     else if (regs.int_no >= 0x13 && regs.int_no < 0x21)
         kprintf("Received reserved interrupt\n");
+    else
+        switch (regs.int_no) {
+        case 0x21:
+            keyboard_isr();
+            break;
+        default:
+            kprintf("Unhandled interrupt\n");
+            break;
+        }
 }

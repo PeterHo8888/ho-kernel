@@ -24,41 +24,14 @@ struct idt_ptr {
 extern void write_idt(struct idt_ptr *desc);
 
 #define IDT_SIZE 256
-#define IDT_RESERVED_SIZE 0x20
+#define IDT_RESERVED_SIZE 0x256
 struct idt_entry IDT[IDT_SIZE];
 static void (*isr_fn[IDT_RESERVED_SIZE]) = {
-    isr0,
-    isr1,
-    isr2,
-    isr3,
-    isr4,
-    isr5,
-    isr6,
-    isr7,
-    isr8,
-    isr9,
-    isr10,
-    isr11,
-    isr12,
-    isr13,
-    isr14,
-    isr15,
-    isr16,
-    isr17,
-    isr18,
-    isr19,
-    isr20,
-    isr21,
-    isr22,
-    isr23,
-    isr24,
-    isr25,
-    isr26,
-    isr27,
-    isr28,
-    isr29,
-    isr30,
-    isr31,
+    isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7, isr8, isr9,
+    isr10, isr11, isr12, isr13, isr14, isr15, isr16, isr17, isr18, isr19,
+    isr20, isr21, isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29,
+    isr30, isr31, isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39,
+    isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47, isr48, isr49,
 };
 
 static void encode_idt_entry(struct idt_entry *entry, uint32_t base, uint16_t sel, uint8_t flags)
@@ -75,7 +48,7 @@ void idt_init()
 {
     memset(IDT, 0, sizeof(IDT));
 
-    for (size_t i = 0; i < 32; ++i)
+    for (size_t i = 0; i < IDT_RESERVED_SIZE; ++i)
         if (isr_fn[i])
             encode_idt_entry(&IDT[i], (uint32_t)isr_fn[i], 0x08, 0x8e);
 

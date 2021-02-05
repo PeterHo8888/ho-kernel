@@ -22,7 +22,7 @@ void init()
 {
     gdt_init();
     idt_init();
-    //kb_init();
+    kb_init();
 }
 
 void kmain(void)
