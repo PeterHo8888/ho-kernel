@@ -16,9 +16,16 @@ static int print(const char *data, size_t len)
 
 int printf(const char *format, ...)
 {
-    va_list list;
-    va_start(list, format);
+    int result;
+    va_list args;
+    va_start(args, format);
+    result = vprintf(format, args);
+    va_end(args);
+    return result;
+}
 
+int vprintf(const char *format, va_list args)
+{
     int bytes_written = 0;
 
     while (*format) {
@@ -42,14 +49,14 @@ int printf(const char *format, ...)
         switch (*++format) {
         case 'c':
             ++format;
-            const char c = (char) va_arg(list, int);
+            const char c = (char) va_arg(args, int);
             if (!print(&c, sizeof(c)))
                 return -1;
             ++bytes_written;
             break;
         case 's':
             ++format;
-            const char *s = va_arg(list, const char *);
+            const char *s = va_arg(args, const char *);
             size_t len = strlen(s);
             if (!print(s, len))
                 return -1;
@@ -57,7 +64,6 @@ int printf(const char *format, ...)
             break;
         }
     }
-    va_end(list);
     return bytes_written;
 }
 

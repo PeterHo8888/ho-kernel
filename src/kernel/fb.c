@@ -1,7 +1,8 @@
 #include <kernel/kernel.h>
 #include <kernel/fb.h>
 #include <kernel/types.h>
-//#include <lib/string.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 #define FB_WIDTH 80
@@ -110,4 +111,23 @@ void kputs(char *str)
     while (*str) {
         kputc(*str++);
     }
+}
+
+void kfatal(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    printf("kernel: [FATAL]: ");
+    vprintf(format, args);
+    va_end(args);
+    //asm volatile("hcf"); // doesn't actually work
+}
+
+void kprintf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    printf("kernel: ");
+    vprintf(format, args);
+    va_end(args);
 }
