@@ -33,42 +33,40 @@ void kb_init()
 }
 
 static const char *cpu_reserved_interrupt_str[0x13] = {
-    "DIV_BY_0",
-    "DEBUG",
-    "NON_MASKABLE_INT",
-    "BREAKPOINT",
-    "INTO_DETECT_OVERFLOW",
-    "OUT_OF_BOUNDS",
-    "INVALID_OPCODE",
-    "NO_COPROCESSOR",
-    "DOUBLE_FAULT",
-    "COPROCESSOR_SEGMENT_OVERRUN",
-    "BAD_TSS",
-    "SEGMENT_NOT_PRESENT",
-    "STACK_FAULT",
-    "GENERAL_PROTECTION_FAULT",
-    "PAGE_FAULT",
-    "UNKNOWN_INTERRUPT",
-    "COPROCESSOR_FAULT",
-    "ALIGNMENT_CHECK",
-    "MACHINE_CHECK"
+    "DIV_BY_0",                     // 0
+    "DEBUG",                        // 1
+    "NON_MASKABLE_INT",             // 2
+    "BREAKPOINT",                   // 3
+    "INTO_DETECT_OVERFLOW",         // 4
+    "OUT_OF_BOUNDS",                // 5
+    "INVALID_OPCODE",               // 6
+    "NO_COPROCESSOR",               // 7
+    "DOUBLE_FAULT",                 // 8
+    "COPROCESSOR_SEGMENT_OVERRUN",  // 9
+    "BAD_TSS",                      // A
+    "SEGMENT_NOT_PRESENT",          // B
+    "STACK_FAULT",                  // C
+    "GENERAL_PROTECTION_FAULT",     // D
+    "PAGE_FAULT",                   // E
+    "UNKNOWN_INTERRUPT",            // F
+    "COPROCESSOR_FAULT",            // 10
+    "ALIGNMENT_CHECK",              // 11
+    "MACHINE_CHECK"                 // 12
 };
 
-void isr_handler(struct cpu_ctx regs)
+void isr_handler(struct cpu_ctx ctx)
 {
-    *(uint16_t*)(0xb8000 + 79 * 2) = (14 << 8) | (regs.int_no + '0');
+    *(uint16_t*)(0xb8000 + 79 * 2) = (14 << 8) | (ctx.int_no + '0');
 
-    if (regs.int_no < 0x13)
-        kprintf("Received interrupt %s\n", cpu_reserved_interrupt_str[regs.int_no]);
-    else if (regs.int_no >= 0x13 && regs.int_no < 0x21)
-        kprintf("Received reserved interrupt\n");
-    else
-        switch (regs.int_no) {
-        case 0x21:
-            keyboard_isr();
-            break;
-        default:
-            kprintf("Unhandled interrupt\n");
-            break;
-        }
+    switch (ctx.int_no) {
+    case 0x21:
+        keyboard_isr();
+        break;
+    default:
+        kprintf("Unhandled interrupt %d: %s\n",
+                ctx.int_no,
+                (ctx.int_no < 0x13) ? cpu_reserved_interrupt_str[ctx.int_no] : "undefined"
+               );
+        break;
+    }
 }
