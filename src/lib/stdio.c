@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <kernel/fb.h>
@@ -46,6 +47,7 @@ int vprintf(const char *format, va_list args)
         }
 
         // We have a %
+        size_t len;
         switch (*++format) {
         case 'c':
             ++format;
@@ -54,13 +56,23 @@ int vprintf(const char *format, va_list args)
                 return -1;
             ++bytes_written;
             break;
+        case 'd':
+            ++format;
+            const int d = va_arg(args, int);
+            char buf[16];
+            itoa(d, buf);
+            len = strlen(buf);
+            if (!print(buf, len))
+                return -1;
+            bytes_written += len;
+            break;
         case 's':
             ++format;
             const char *s = va_arg(args, const char *);
-            size_t len = strlen(s);
+            len = strlen(s);
             if (!print(s, len))
                 return -1;
-            ++bytes_written;
+            bytes_written += len;
             break;
         }
     }
