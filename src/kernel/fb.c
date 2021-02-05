@@ -120,6 +120,8 @@ void kfatal(const char *format, ...)
     printf("kernel: [FATAL]: ");
     vprintf(format, args);
     va_end(args);
+    while (1)
+        asm volatile("hlt");
     //asm volatile("hcf"); // doesn't actually work
 }
 
