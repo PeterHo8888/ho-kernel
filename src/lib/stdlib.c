@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <kernel/fb.h>
 
 __attribute__((__noreturn__)) void abort()
 {
@@ -20,15 +21,20 @@ static void reverse(char *s)
     }
 }
 
-char *itoa(int val, char *s)
+char *itoa(int val, char *s, int base)
 {
+    static const char lookup[16] = {
+        '0', '1', '2', '3', '4', '5',
+        '6', '7', '8', '9', 'A', 'B',
+        'C', 'D', 'E', 'F'
+    };
     int i = 0;
     int sign = val;
 
     do {
-        int digit = abs(val % 10);
-        s[i++] = digit + '0';
-        val /= 10;
+        int digit = abs(val % base);
+        s[i++] = lookup[digit];
+        val /= base;
     } while (val);
     if (sign < 0)
         s[i++] = '-';

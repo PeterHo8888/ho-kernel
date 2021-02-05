@@ -47,31 +47,41 @@ int vprintf(const char *format, va_list args)
         }
 
         // We have a %
+        size_t pad = 0;
+        while (*++format >= '0' && *format <= '9')
+            pad = pad * 10 + *format - '0';
+
         size_t len;
-        switch (*++format) {
+        switch (*format) {
         case 'c':
-            ++format;
             const char c = (char) va_arg(args, int);
             if (!print(&c, sizeof(c)))
                 return -1;
+            ++format;
             ++bytes_written;
             break;
         case 'd':
-            ++format;
+        case 'x':
             const int d = va_arg(args, int);
-            char buf[16];
-            itoa(d, buf);
+            char buf[80];
+            itoa(d, buf, (*format == 'd') ? 10 : 16);
             len = strlen(buf);
+            if (pad > len) {
+                memmove(buf + pad - len, buf, len + 1);
+                memset(buf, '0', pad - len);
+                len = pad;
+            }
             if (!print(buf, len))
                 return -1;
+            ++format;
             bytes_written += len;
             break;
         case 's':
-            ++format;
             const char *s = va_arg(args, const char *);
             len = strlen(s);
             if (!print(s, len))
                 return -1;
+            ++format;
             bytes_written += len;
             break;
         }
