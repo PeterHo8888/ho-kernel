@@ -1,8 +1,8 @@
 #include <kernel/kernel.h>
 #include <kernel/fb.h>
-#include <kernel/io.h>
 #include <kernel/interrupts.h>
 #include <kernel/gdt.h>
+#include <kernel/idt.h>
 #include <stdio.h>
 
 #if defined(__linux__)
@@ -22,7 +22,7 @@ void init()
 {
     gdt_init();
     idt_init();
-    kb_init();
+    //kb_init();
 }
 
 void kmain(void)
@@ -33,6 +33,8 @@ void kmain(void)
     printf("Hello kernel!\nHello world!\n\n");
 
     init();
+
+    asm volatile("int $0x3");
 
     return;
 }

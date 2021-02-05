@@ -8,7 +8,7 @@ CXXFLAGS = -ffreestanding -O2 -Wall -Wextra -fno-use-cxa-atexit -fno-exceptions 
 
 AS = nasm -f elf32
 
-obj = kernel.o io.o interrupts.o sys.o fb.o gdt.o
+obj = kernel.o io.o interrupts.o sys.o fb.o gdt.o idt.o isr.o
 
 .PHONY: all clean
 
@@ -21,7 +21,10 @@ all: $(obj)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 sys.o: sys.s
-	$(AS) -o sys.o $<
+	$(AS) -o $@ $<
+
+isr.o: isr.s
+	$(AS) -o $@ $<
 
 clean:
 	rm -f *.o
