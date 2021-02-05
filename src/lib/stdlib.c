@@ -25,11 +25,11 @@ char *itoa(int val, char *s)
     int i = 0;
     int sign = val;
 
-    while (val) {
+    do {
         int digit = abs(val % 10);
         s[i++] = digit + '0';
         val /= 10;
-    }
+    } while (val);
     if (sign < 0)
         s[i++] = '-';
     s[i] = '\0';
@@ -39,6 +39,7 @@ char *itoa(int val, char *s)
 
 int abs(int j)
 {
-    *(char *)&j &= 0x7F;
-    return j;   // violates some aliasing rules
+    // sign extend for XOR + sign bit
+    // flips bits and adds 1 when negative
+    return (j ^ (j >> 31)) + ((unsigned int)j >> 31);
 }
