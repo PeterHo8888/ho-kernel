@@ -11,12 +11,17 @@ section .text
 
 start:
     cli
+
     mov esp, stack_space
+    xor ebp, ebp
+
     call kmain
-forever:
+
+.1:
     hlt
-    jmp forever
+    jmp .1
 
 section .bss
+align 16
 resb 16384
 stack_space:

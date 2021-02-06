@@ -5,9 +5,9 @@
 
 __attribute__((__noreturn__)) void abort()
 {
-    kfatal("abort()\n");
+    kprintf("abort(): hlt\n");
     while (1)
-        ;
+        asm volatile("hlt");
     __builtin_unreachable();
 }
 

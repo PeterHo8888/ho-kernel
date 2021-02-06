@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define FB_WIDTH 80
 #define FB_HEIGHT 25
@@ -94,6 +95,7 @@ void kputc(char c)
         break;
     case '\t':
         vga_index += 4;
+        vga_index -= vga_index % 4;
         break;
     default:
         terminal_buffer[vga_index++] = vga_fmt(c, FG_COLOR, BG_COLOR);
@@ -117,12 +119,15 @@ void kfatal(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    printf("kernel: [FATAL]: ");
-    vprintf(format, args);
+
+    kdump_trace(10);
+
+    kprintf("[FATAL]: ");
+    if (*format)
+        vprintf(format, args);
+
     va_end(args);
-    while (1)
-        asm volatile("hlt");
-    //asm volatile("hcf"); // doesn't actually work
+    abort();
 }
 
 void kprintf(const char *format, ...)

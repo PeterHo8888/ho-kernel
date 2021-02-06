@@ -1,11 +1,11 @@
-; http://jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
+; macros from http://jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
 
 %macro ISR_NOERRCODE 1
 global isr%1
 isr%1:
     cli
-    push byte 0
-    push byte %1
+    push 0
+    push %1
     jmp isr_stub
 %endmacro
 
@@ -13,7 +13,7 @@ isr%1:
 global isr%1
 isr%1:
     cli
-    push byte %1
+    push %1
     jmp isr_stub
 %endmacro
 
@@ -22,22 +22,44 @@ extern putchar
 isr_stub:
     pushad          ; save all regs
 
-    mov ax, ds      ; save data seg descriptor
+    mov eax, ds     ; save data seg descriptor
+    push eax
+    mov eax, es
+    push eax
+    mov eax, fs
+    push eax
+    mov eax, gs
     push eax
 
-    ;mov ax, 0x10    ; load kernel data descriptor
-    ;mov ds, ax
-    ;mov es, ax
-    ;mov fs, ax
-    ;mov gs, ax
+    mov ax, 0x10    ; load kernel data descriptor
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    push eax        ; pad for 16-byte alignment
+    push eax        ; amount calculated with alignment check
+
+    mov eax, esp    ; for alignment check
+    sub eax, 4
+    push eax
 
     call isr_handler
 
+    pop eax         ; pop alignment check
+    pop eax         ; pop padding
+    pop eax         ; pop padding
+
+    ; restore segments
+    ; they should be all the same value
     pop eax
-    ;mov ds, ax
-    ;mov es, ax
-    ;mov fs, ax
-    ;mov gs, ax
+    mov gs, ax
+    pop eax
+    mov fs, ax
+    pop eax
+    mov es, ax
+    pop eax
+    mov ds, ax
 
     popad
     add esp, 8      ; error code and ISR#

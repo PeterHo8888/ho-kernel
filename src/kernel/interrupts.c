@@ -4,6 +4,7 @@
 #include <kernel/interrupts.h>
 #include <kernel/fb.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
@@ -54,16 +55,34 @@ static const char *cpu_reserved_interrupt_str[0x13] = {
     "MACHINE_CHECK"                 // 12
 };
 
+static void gpf_isr(struct cpu_ctx ctx)
+{
+    kprintf("General Protection Fault: errcode=%4x addr=%8x\n", ctx.err_code, ctx.eip);
+    kdump_regs(ctx);
+    kdump_trace();
+    abort();
+}
+
 void isr_handler(struct cpu_ctx ctx)
 {
     *(uint16_t*)(0xb8000 + 79 * 2) = (14 << 8) | (ctx.int_no + '0');
 
     switch (ctx.int_no) {
+    case 0x1:
+        debug_isr(ctx);
+        break;
+    case 0xd:
+        gpf_isr(ctx);
+        break;
     case 0x21:
         keyboard_isr();
         break;
+    case 0x8:
+    case 0x12:
+        kfatal("Fatal interrupt 0x%x: %s\n", ctx.int_no, cpu_reserved_interrupt_str[ctx.int_no]);
+        break;
     default:
-        kprintf("Unhandled interrupt %d: %s\n",
+        kprintf("Unhandled interrupt 0x%x: %s\n",
                 ctx.int_no,
                 (ctx.int_no < 0x13) ? cpu_reserved_interrupt_str[ctx.int_no] : "undefined"
                );

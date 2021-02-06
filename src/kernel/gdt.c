@@ -1,4 +1,5 @@
 #include <kernel/gdt.h>
+#include <kernel/fb.h>
 #include <stdio.h>
 
 /*
@@ -56,6 +57,16 @@ static void encode_gdt_entry(struct gdt_entry *entry, uint32_t base, uint32_t li
     entry->access = access;
 }
 
+static uint32_t decode_base(struct gdt_entry *entry)
+{
+    return entry->base_lo | (entry->base_mid << 16) | (entry->base_hi << 24);
+}
+
+static uint32_t decode_limit(struct gdt_entry *entry)
+{
+    return entry->limit_lo | (entry->granularity_limit_hi & 0xf) << 16;
+}
+
 #define SEGMENT_SIZE 0xFFFFFFFF
 
 #define KERNEL_CODE_ACCESS 0x9A // (ring 0)
@@ -70,6 +81,9 @@ void gdt_init()
     encode_gdt_entry(&GDT[2], 0, SEGMENT_SIZE, KERNEL_DATA_ACCESS, GRANULARITY);
     encode_gdt_entry(&GDT[3], 0, SEGMENT_SIZE, USER_CODE_ACCESS, GRANULARITY);
     encode_gdt_entry(&GDT[4], 0, SEGMENT_SIZE, USER_DATA_ACCESS, GRANULARITY);
+
+    for (size_t i = 0; i < sizeof(GDT)/sizeof(*GDT); ++i)
+        kprintf("gdt: entry=%2x, base=%8x limit=%8x\n", sizeof(GDT[0]) * (&GDT[i] - &GDT[0]), decode_base(&GDT[i]), decode_limit(&GDT[i]));
 
     write_gdt(&ptr);
 }
